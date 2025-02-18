@@ -46,7 +46,11 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction", "getting-started"]
+      "pages": [
+        "introduction",
+        "getting-started/getting-started",
+        "getting-started/create-your-first-template"
+      ]
     },
     {
       "group": "API Documentation",
