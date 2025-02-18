@@ -1,0 +1,60 @@
+---
+title: "API Reference"
+description: "Documentation for the tRPC-based REST API endpoints"
+---
+
+## Overview
+
+Our API is built using tRPC with Next.js, providing type-safe API endpoints. The API is organized into several routers that handle different aspects of the application:
+
+- **Chat Session Router** - 💬 Chat session management and history
+- **Studio Router** - 🏢 LLM studio configuration and management
+  - 📁 Folder management
+  - ✉️ Message handling
+  - 🤖 Response processing
+- **Template Router** - 📋 Template creation and management
+- **Tools Router** - 🛠️ AI tool configuration and integration
+- **Knowledge Base Router** - 🧠 Knowledge base operations
+  - 🕷️ Crawl jobs for data gathering
+  - 📦 KB package management
+
+## Authentication
+
+All protected endpoints require authentication using a bearer token. The API uses NextAuth.js for authentication with support for:
+
+- Google OAuth
+- Credentials (username/password)
+
+## Common Parameters
+
+Many endpoints share common parameters:
+
+- `workspaceId` - The ID of the workspace
+- `studioId` - The ID of the studio
+- `userId` - The ID of the authenticated user
+
+## Response Format
+
+All API responses follow a standard format:
+
+```json
+{
+  "data": {},
+  "error": null // Error object if something went wrong
+}
+```
+
+## Error Handling
+
+The API uses standard HTTP status codes and returns detailed error messages:
+
+- 400 - Bad Request
+- 401 - Unauthorized
+- 403 - Forbidden
+- 404 - Not Found
+- 500 - Internal Server Error
+
+Each error response includes:
+
+- `code` - Error code
+- `message` - Human-readable error message

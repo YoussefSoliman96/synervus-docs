@@ -1,0 +1,2520 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Example CRUD API",
+    "description": "OpenAPI compliant REST API built using tRPC with Next.js",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api"
+    }
+  ],
+  "paths": {
+    "/hello/{text}": {
+      "get": {
+        "operationId": "llms-hello",
+        "summary": "Say hello",
+        "parameters": [
+          {
+            "name": "text",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The text to say hello to"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "The hello message"
+                    }
+                  },
+                  "required": ["text"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      }
+    },
+    "/v2/workspaces/invitations/verify": {
+      "get": {
+        "operationId": "verify-workspace-invitation",
+        "summary": "Verify Workspace Invitation",
+        "description": "Verifies the validity of a workspace invitation token. Returns the workspace ID if the token is valid.",
+        "tags": ["workspaces"],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The invitation verification token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation verified successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "valid": {
+                      "type": "boolean",
+                      "description": "Whether the invitation is valid"
+                    },
+                    "workspaceId": {
+                      "type": "string",
+                      "description": "The ID of the workspace the invitation is for"
+                    }
+                  },
+                  "required": ["valid", "workspaceId"],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/error"
+          }
+        }
+      }
+    },
+    "/v2/workspaces": {
+      "get": {
+        "operationId": "get-workspaces",
+        "summary": "Get All Workspaces",
+        "description": "Fetches all workspaces where the authenticated user is a member. Returns a list of workspaces with their basic information including ID, name, and type.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "responses": {
+          "200": {
+            "description": "List of workspaces",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "type": {
+                        "type": "string",
+                        "enum": ["standard", "reseller"]
+                      }
+                    },
+                    "required": ["id", "name", "type"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-workspace",
+        "summary": "Create Workspace",
+        "description": "Creates a new workspace with the specified name. Optionally accepts a base64-encoded image for the workspace avatar.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Workspace created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}": {
+      "delete": {
+        "operationId": "delete-workspace",
+        "summary": "Delete Workspace",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workspace deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/members": {
+      "get": {
+        "operationId": "get-workspace-members",
+        "summary": "Get Workspace Members",
+        "description": "Retrieves the list of members in a workspace. Returns member details including their ID, name, email, and role within the workspace.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of workspace members",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "email": { "type": "string" },
+                      "role": { "type": "string" }
+                    },
+                    "required": ["id", "name", "email", "role"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/invitations": {
+      "post": {
+        "operationId": "send-workspace-invitation",
+        "summary": "Send Invitation",
+        "description": "Sends an invitation to a user to join the workspace. The invitee will receive an email with a verification token.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "member"]
+                  }
+                },
+                "required": ["email", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation sent successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "cancel-workspace-invitation",
+        "summary": "Cancel Invitation",
+        "description": "Cancels a pending workspace invitation. The invitation token will be invalidated.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation cancelled successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/invitations/accept": {
+      "post": {
+        "operationId": "accept-workspace-invitation",
+        "summary": "Accept Invitation",
+        "description": "Accepts a workspace invitation using the provided token. Adds the authenticated user to the workspace.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" }
+                },
+                "required": ["token"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation accepted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "workspaceId": { "type": "string" }
+                  },
+                  "required": ["workspaceId"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/api-keys": {
+      "post": {
+        "operationId": "generate-api-key",
+        "summary": "Generate API Key",
+        "description": "Generates a new API key for the workspace. The key can be associated with a specific LLM studio and have read or admin permissions.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "studioId": { "type": "string" },
+                  "permissions": {
+                    "type": "string",
+                    "enum": ["read", "admin"]
+                  }
+                },
+                "required": ["studioId", "permissions"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "API key generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "apiKey": { "type": "string" }
+                  },
+                  "required": ["apiKey"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/api-keys/{id}": {
+      "put": {
+        "operationId": "update-api-key",
+        "summary": "Update API Key",
+        "description": "Updates an existing API key's name, permissions, or studio association.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "studioId": { "type": "string" },
+                  "permissions": {
+                    "type": "string",
+                    "enum": ["read", "admin"]
+                  }
+                },
+                "required": ["name", "studioId", "permissions"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "API key updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "delete-api-key",
+        "summary": "Delete API Key",
+        "description": "Permanently deletes an API key. This action cannot be undone.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "API key deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/convert-to-reseller": {
+      "post": {
+        "operationId": "convert-to-reseller",
+        "summary": "Convert Workspace to Reseller",
+        "description": "Converts a standard workspace into a reseller account, enabling additional features and capabilities.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "studioId": { "type": "string" }
+                },
+                "required": ["studioId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Workspace converted to reseller successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/convert-to-standard": {
+      "post": {
+        "operationId": "convert-to-standard",
+        "summary": "Convert Workspace to Standard",
+        "description": "Converts a reseller workspace back to a standard workspace. This will remove reseller-specific features.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "studioId": { "type": "string" }
+                },
+                "required": ["studioId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Workspace converted to standard successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/stripe-customer": {
+      "get": {
+        "operationId": "get-stripe-customer",
+        "summary": "Get Stripe Customer Details",
+        "description": "Retrieves the Stripe customer information associated with the workspace, including subscription and billing details.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stripe customer details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "customerId": { "type": "string" },
+                    "subscriptionStatus": { "type": "string" },
+                    "subscriptionEnd": { "type": "string" },
+                    "billingDetails": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "email": { "type": "string" },
+                        "address": {
+                          "type": "object",
+                          "properties": {
+                            "line1": { "type": "string" },
+                            "line2": { "type": "string" },
+                            "city": { "type": "string" },
+                            "state": { "type": "string" },
+                            "postalCode": { "type": "string" },
+                            "country": { "type": "string" }
+                          },
+                          "required": [
+                            "line1",
+                            "city",
+                            "state",
+                            "postalCode",
+                            "country"
+                          ]
+                        }
+                      },
+                      "required": ["name", "email", "address"]
+                    }
+                  },
+                  "required": [
+                    "customerId",
+                    "subscriptionStatus",
+                    "subscriptionEnd",
+                    "billingDetails"
+                  ]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/workspaces/{workspaceId}/llm-studios": {
+      "get": {
+        "operationId": "get-llm-studios",
+        "summary": "Get LLM Studios",
+        "description": "Retrieves a list of LLM studios associated with the workspace. Each studio contains configuration for language model interactions.",
+        "tags": ["workspaces"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of LLM studios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "type": { "type": "string" },
+                      "configuration": { "type": "object" }
+                    },
+                    "required": ["id", "name", "type", "configuration"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions": {
+      "get": {
+        "operationId": "get-chat-sessions",
+        "summary": "Get Chat Sessions",
+        "description": "Fetches a list of chat sessions based on the provided filters.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "studioId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "workspaceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "isShared",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of chat sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "title": { "type": "string" },
+                      "folderId": { "type": "string" },
+                      "studioId": { "type": "string" },
+                      "isShared": { "type": "boolean" },
+                      "createdAt": { "type": "string", "format": "date-time" },
+                      "updatedAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": [
+                      "id",
+                      "title",
+                      "studioId",
+                      "isShared",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-chat-session",
+        "summary": "Create Chat Session",
+        "description": "Creates a new chat session.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "folderId": { "type": "string" },
+                  "isShared": { "type": "boolean" },
+                  "studioId": { "type": "string" },
+                  "workspaceId": { "type": "string" }
+                },
+                "required": [
+                  "id",
+                  "folderId",
+                  "isShared",
+                  "studioId",
+                  "workspaceId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/all": {
+      "get": {
+        "operationId": "get-all-chat-sessions",
+        "summary": "Get All Chat Sessions",
+        "description": "Fetches all chat sessions belonging to a studio.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "studioId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "workspaceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "isShared",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all chat sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "title": { "type": "string" },
+                      "folderId": { "type": "string" },
+                      "studioId": { "type": "string" },
+                      "isShared": { "type": "boolean" }
+                    },
+                    "required": ["id", "title", "studioId", "isShared"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/{id}": {
+      "get": {
+        "operationId": "get-chat-session",
+        "summary": "Get Chat Session",
+        "description": "Retrieves details of a specific chat session, including messages and responses.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string" },
+                    "messages": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "content": { "type": "string" },
+                          "role": {
+                            "type": "string",
+                            "enum": ["user", "assistant"]
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": ["id", "content", "role", "createdAt"]
+                      }
+                    }
+                  },
+                  "required": ["id", "title", "messages"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "put": {
+        "operationId": "update-chat-session",
+        "summary": "Update Chat Session",
+        "description": "Updates an existing chat session.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "folderId": { "type": "string" },
+                  "studioId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat session updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "delete-chat-session",
+        "summary": "Delete Chat Session",
+        "description": "Deletes a chat session.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/{id}/rename": {
+      "patch": {
+        "operationId": "rename-chat-session",
+        "summary": "Rename Chat Session",
+        "description": "Renames an existing chat session.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sessionName": { "type": "string" }
+                },
+                "required": ["sessionName"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat session renamed successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/{chatSessionId}/empty": {
+      "delete": {
+        "operationId": "delete-empty-chat-session",
+        "summary": "Delete Empty Chat Session",
+        "description": "Deletes a chat session if it has no messages.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "chatSessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Empty chat session deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/{chatSessionId}/details": {
+      "get": {
+        "operationId": "get-chat-session-details",
+        "summary": "Get Chat Session Details",
+        "description": "Fetches details of a chat session.",
+        "tags": ["chat-sessions"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "chatSessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat session details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string" },
+                    "folderId": { "type": "string" },
+                    "studioId": { "type": "string" },
+                    "isShared": { "type": "boolean" },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "studioId",
+                    "isShared",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/folders": {
+      "get": {
+        "operationId": "get-folders",
+        "summary": "Get Chat Folders",
+        "description": "Fetches all folders for a specific studio.",
+        "tags": ["folders"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "studioId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of folders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "studioId": { "type": "string" },
+                      "isShared": { "type": "boolean" }
+                    },
+                    "required": ["id", "name", "studioId", "isShared"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-folder",
+        "summary": "Create Chat Folder",
+        "description": "Creates a new chat folder.",
+        "tags": ["folders"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "studioId": { "type": "string" },
+                  "isShared": { "type": "boolean" }
+                },
+                "required": ["name", "studioId", "isShared"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Folder created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/folders/{folderId}": {
+      "delete": {
+        "operationId": "delete-folder",
+        "summary": "Delete Chat Folder",
+        "description": "Deletes a chat folder.",
+        "tags": ["folders"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Folder deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "put": {
+        "operationId": "update-folder",
+        "summary": "Update Chat Folder",
+        "description": "Updates an existing chat folder.",
+        "tags": ["folders"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "isShared": { "type": "boolean" }
+                },
+                "required": ["name", "isShared"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Folder updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "patch": {
+        "operationId": "update-folder-structure",
+        "summary": "Update Folder Structure",
+        "description": "Updates the structure of a chat folder.",
+        "tags": ["folders"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "folderId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "folderId": { "type": "string" },
+                  "studioId": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Folder structure updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/chat-sessions/{chatSessionId}/messages": {
+      "get": {
+        "operationId": "get-messages",
+        "summary": "Get Messages",
+        "description": "Fetches all messages for a specific chat session.",
+        "tags": ["messages"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "chatSessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "content": { "type": "string" },
+                      "role": {
+                        "type": "string",
+                        "enum": ["user", "assistant"]
+                      },
+                      "chatSessionId": { "type": "string" },
+                      "createdAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": [
+                      "id",
+                      "content",
+                      "role",
+                      "chatSessionId",
+                      "createdAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/studio/messages": {
+      "post": {
+        "operationId": "create-message",
+        "summary": "Create Message",
+        "description": "Creates a new message in a chat session.",
+        "tags": ["messages"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": { "type": "string" },
+                  "chatSessionId": { "type": "string" },
+                  "role": {
+                    "type": "string",
+                    "enum": ["user", "assistant"]
+                  }
+                },
+                "required": ["content", "chatSessionId", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/studio/responses": {
+      "post": {
+        "operationId": "create-response",
+        "summary": "Create Response",
+        "description": "Creates a new response for a message.",
+        "tags": ["responses"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": { "type": "string" },
+                  "messageId": { "type": "string" },
+                  "modelId": { "type": "string" }
+                },
+                "required": ["content", "messageId", "modelId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/messages/{messageId}": {
+      "patch": {
+        "operationId": "edit-message",
+        "summary": "Edit Message",
+        "description": "Edits an existing message in a chat session.",
+        "tags": ["messages"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": { "type": "string" }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "content": { "type": "string" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": ["id", "content", "updatedAt"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/responses/{messageId}/regenerate": {
+      "post": {
+        "operationId": "regenerate-response",
+        "summary": "Regenerate Response",
+        "description": "Regenerates a response using a different model.",
+        "tags": ["responses"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "newModelId": { "type": "string" }
+                },
+                "required": ["newModelId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response regenerated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/responses/{messageId}/versions": {
+      "get": {
+        "operationId": "get-response-versions",
+        "summary": "Get Response Versions",
+        "description": "Fetches all versions of a response for a given message.",
+        "tags": ["responses"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of response versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "content": { "type": "string" },
+                      "modelId": { "type": "string" },
+                      "createdAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": ["id", "content", "modelId", "createdAt"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/responses/{messageId}/switch": {
+      "patch": {
+        "operationId": "switch-response-version",
+        "summary": "Switch Response Version",
+        "description": "Switches to a different response version for a given message.",
+        "tags": ["responses"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "responseId": { "type": "string" }
+                },
+                "required": ["responseId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response version switched successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/responses/{chatSessionId}/generate": {
+      "post": {
+        "operationId": "generate-new-response",
+        "summary": "Generate New Response",
+        "description": "Generates a new response after editing a message.",
+        "tags": ["responses"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "chatSessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "editedMessageId": { "type": "string" }
+                },
+                "required": ["editedMessageId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "New response generated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/messages/{messageId}/versions": {
+      "get": {
+        "operationId": "get-message-versions",
+        "summary": "Get Message Versions",
+        "description": "Fetches all versions of a message, ordered by version in descending order.",
+        "tags": ["messages"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of message versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "text": { "type": "string" },
+                      "version": { "type": "number" },
+                      "originalMessageId": { "type": "string" },
+                      "isLatest": { "type": "boolean" },
+                      "role": {
+                        "type": "string",
+                        "enum": ["user", "assistant"]
+                      },
+                      "chatSessionId": { "type": "string" },
+                      "createdAt": { "type": "string", "format": "date-time" },
+                      "updatedAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": [
+                      "id",
+                      "text",
+                      "version",
+                      "isLatest",
+                      "role",
+                      "chatSessionId",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/studios": {
+      "post": {
+        "operationId": "create-studio",
+        "summary": "Create LLM Studio",
+        "description": "Creates a new LLM studio.",
+        "tags": ["studio"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "workspaceId": { "type": "string" }
+                },
+                "required": ["name", "workspaceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Studio created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/studios/{studioId}": {
+      "get": {
+        "operationId": "get-studio",
+        "summary": "Get LLM Studio Data",
+        "description": "Retrieves details of a specific LLM studio.",
+        "tags": ["studio"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "studioId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Studio details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "workspaceId": { "type": "string" },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "workspaceId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/templates": {
+      "get": {
+        "operationId": "get-templates",
+        "summary": "Get All Templates",
+        "description": "Retrieves all templates available in a workspace.",
+        "tags": ["templates"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "category": { "type": "string" },
+                      "tags": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                      },
+                      "description": { "type": "string" },
+                      "isPublic": { "type": "boolean" },
+                      "workspaceId": { "type": "string" },
+                      "icon": { "type": "string" },
+                      "createdAt": { "type": "string", "format": "date-time" },
+                      "updatedAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": ["id", "name", "workspaceId"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-template",
+        "summary": "Create Template",
+        "description": "Creates a new template.",
+        "tags": ["templates"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "category": { "type": "string" },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "description": { "type": "string" },
+                  "isPublic": { "type": "boolean" },
+                  "workspaceId": { "type": "string" },
+                  "icon": { "type": "string" }
+                },
+                "required": ["name", "workspaceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Template created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/templates/{templateId}": {
+      "get": {
+        "operationId": "get-template",
+        "summary": "Get Template by ID",
+        "description": "Fetches a specific template by its ID.",
+        "tags": ["templates"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "name": { "type": "string" },
+                    "category": { "type": "string" },
+                    "tags": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "description": { "type": "string" },
+                    "isPublic": { "type": "boolean" },
+                    "workspaceId": { "type": "string" },
+                    "icon": { "type": "string" },
+                    "createdAt": { "type": "string", "format": "date-time" },
+                    "updatedAt": { "type": "string", "format": "date-time" }
+                  },
+                  "required": ["id", "name", "workspaceId"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "put": {
+        "operationId": "update-template",
+        "summary": "Update Template",
+        "description": "Updates an existing template.",
+        "tags": ["templates"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "category": { "type": "string" },
+                  "tags": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "description": { "type": "string" },
+                  "isPublic": { "type": "boolean" },
+                  "icon": { "type": "string" }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Template updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "delete-template",
+        "summary": "Delete Template",
+        "description": "Deletes a template.",
+        "tags": ["templates"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "templateId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Template deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/tools": {
+      "get": {
+        "operationId": "get-tools",
+        "summary": "Get All Tools",
+        "description": "Retrieves all tools available in a workspace.",
+        "tags": ["tools"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "workspaceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tools",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "description": { "type": "string" },
+                      "workspaceId": { "type": "string" },
+                      "isDefault": { "type": "boolean" },
+                      "serverUrl": { "type": "string" },
+                      "serverUrlSecret": { "type": "string" },
+                      "disabled": { "type": "boolean" },
+                      "createdAt": { "type": "string", "format": "date-time" },
+                      "updatedAt": { "type": "string", "format": "date-time" }
+                    },
+                    "required": ["id", "name", "description", "workspaceId"]
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-tool",
+        "summary": "Create Tool",
+        "description": "Creates a new AI tool.",
+        "tags": ["tools"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "workspaceId": { "type": "string" },
+                  "isDefault": { "type": "boolean" },
+                  "serverUrl": { "type": "string" },
+                  "serverUrlSecret": { "type": "string" },
+                  "disabled": { "type": "boolean" }
+                },
+                "required": ["name", "description", "workspaceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" }
+                  },
+                  "required": ["id"]
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/tools/{toolId}": {
+      "put": {
+        "operationId": "update-tool",
+        "summary": "Update Tool",
+        "description": "Updates an existing tool.",
+        "tags": ["tools"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "toolId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "serverUrl": { "type": "string" },
+                  "serverUrlSecret": { "type": "string" },
+                  "disabled": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "delete-tool",
+        "summary": "Delete Tool",
+        "description": "Deletes a tool from the workspace.",
+        "tags": ["tools"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "toolId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tool deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/tools/{toolId}/disable": {
+      "patch": {
+        "operationId": "update-tool-disabled-state",
+        "summary": "Update Tool Disabled State",
+        "description": "Enables or disables a tool.",
+        "tags": ["tools"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "toolId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "disabled": { "type": "boolean" }
+                },
+                "required": ["disabled"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool disabled state updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/kb/crawl-jobs": {
+      "get": {
+        "operationId": "get-crawl-jobs",
+        "summary": "Get Crawl Jobs",
+        "description": "Retrieves all crawl jobs for a given studio and workspace.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "studioId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "workspaceId",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of crawl jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "status": { "type": "string" },
+                      "progress": { "type": "number" },
+                      "createdAt": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-crawl-job",
+        "summary": "Create Crawl Job",
+        "description": "Creates a new crawl job for gathering data from URLs.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "matches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "notMatches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "urls": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "deep": { "type": "boolean" },
+                  "isParent": { "type": "boolean" },
+                  "studioId": { "type": "string" },
+                  "workspaceId": { "type": "string" },
+                  "maxPages": { "type": "number" }
+                },
+                "required": [
+                  "matches",
+                  "notMatches",
+                  "urls",
+                  "deep",
+                  "isParent",
+                  "studioId",
+                  "workspaceId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crawl job created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/kb/packages": {
+      "get": {
+        "operationId": "get-kb-packages",
+        "summary": "Get User KB Packages",
+        "description": "Retrieves all knowledge base packages subscribed by the user.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "responses": {
+          "200": {
+            "description": "List of KB packages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "description": { "type": "string" },
+                      "maxPages": { "type": "number" },
+                      "refreshRate": {
+                        "type": "string",
+                        "enum": ["daily", "weekly", "monthly"]
+                      },
+                      "isPrivate": { "type": "boolean" },
+                      "imageUrl": { "type": "string" },
+                      "crawl": { "type": "boolean" },
+                      "deepScan": { "type": "boolean" },
+                      "createdAt": { "type": "string", "format": "date-time" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "post": {
+        "operationId": "create-kb-package",
+        "summary": "Create KB Package",
+        "description": "Creates a new knowledge base package.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" },
+                  "maxPages": { "type": "number" },
+                  "refreshRate": {
+                    "type": "string",
+                    "enum": ["daily", "weekly", "monthly"]
+                  },
+                  "matches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "unMatches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "isPrivate": { "type": "boolean" },
+                  "links": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "imageUrl": { "type": "string" },
+                  "crawl": { "type": "boolean" },
+                  "deepScan": { "type": "boolean" }
+                },
+                "required": [
+                  "name",
+                  "isPrivate",
+                  "links",
+                  "keywords",
+                  "crawl",
+                  "deepScan"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KB package created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/kb/crawl-jobs/files": {
+      "post": {
+        "operationId": "create-crawl-job-from-files",
+        "summary": "Create Crawl Job from Files",
+        "description": "Creates a new crawl job using uploaded files.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "base64": { "type": "string" },
+                        "name": { "type": "string" },
+                        "type": { "type": "string" }
+                      },
+                      "required": ["base64", "name", "type"]
+                    }
+                  },
+                  "studioId": { "type": "string" },
+                  "workspaceId": { "type": "string" },
+                  "matches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "notMatches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "isParent": { "type": "boolean" },
+                  "maxPages": { "type": "number" }
+                },
+                "required": [
+                  "files",
+                  "studioId",
+                  "workspaceId",
+                  "matches",
+                  "notMatches",
+                  "isParent",
+                  "maxPages"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crawl job created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/kb/crawl-jobs/kb-package": {
+      "post": {
+        "operationId": "create-crawl-job-from-package",
+        "summary": "Create Crawl Job from KB Package",
+        "description": "Creates a new crawl job based on a knowledge base package.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kbPackageId": { "type": "string" },
+                  "studioId": { "type": "string" },
+                  "workspaceId": { "type": "string" }
+                },
+                "required": ["kbPackageId", "studioId", "workspaceId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crawl job created successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    },
+    "/v2/kb/packages/{packageId}": {
+      "put": {
+        "operationId": "update-kb-package",
+        "summary": "Update KB Package",
+        "description": "Updates an existing knowledge base package.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "minLength": 2 },
+                  "description": { "type": "string", "minLength": 1 },
+                  "maxPages": { "type": "number" },
+                  "refreshRate": {
+                    "type": "string",
+                    "enum": ["daily", "weekly", "monthly"]
+                  },
+                  "matches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "unMatches": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "isPrivate": { "type": "boolean" },
+                  "links": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "minItems": 1
+                  },
+                  "keywords": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "imageUrl": { "type": "string" },
+                  "crawl": { "type": "boolean" },
+                  "deepScan": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KB package updated successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      },
+      "delete": {
+        "operationId": "delete-kb-package",
+        "summary": "Delete KB Package",
+        "description": "Deletes a knowledge base package.",
+        "tags": ["kb"],
+        "security": [{ "Authorization": [] }],
+        "parameters": [
+          {
+            "name": "packageId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KB package deleted successfully"
+          },
+          "default": { "$ref": "#/components/responses/error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "responses": {
+      "error": {
+        "description": "Error response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "issues": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "message": {
+                        "type": "string"
+                      }
+                    },
+                    "required": ["message"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": ["message", "code"],
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "auth"
+    },
+    {
+      "name": "users"
+    },
+    {
+      "name": "posts"
+    },
+    {
+      "name": "workspaces"
+    },
+    {
+      "name": "chat-sessions"
+    },
+    {
+      "name": "folders"
+    },
+    {
+      "name": "messages"
+    },
+    {
+      "name": "responses"
+    },
+    {
+      "name": "studio"
+    },
+    {
+      "name": "templates"
+    },
+    {
+      "name": "tools"
+    },
+    {
+      "name": "kb"
+    }
+  ],
+  "externalDocs": {
+    "url": "https://github.com/jlalmes/trpc-openapi"
+  }
+}
