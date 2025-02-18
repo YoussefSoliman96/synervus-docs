@@ -1,0 +1,142 @@
+---
+title: "Getting Started with Synervus"
+description: "Learn the basics of using Synervus for your AI automation needs"
+---
+
+## Understanding the Basics
+
+Think of Synervus as your AI command center. Let's break down the main components:
+
+### Workspaces 🏢
+
+A workspace is like a company or team folder. It's where you:
+
+- Keep all your AI assistants together
+- Manage who can access what
+- Track how much you're using
+- Set up billing
+
+**Example:** A marketing agency might have one workspace for their team, with different AI assistants for each client.
+
+### Studios 🎨
+
+Studios are your individual AI assistants. Each studio is like a specialized employee that can:
+
+- Handle specific tasks (like customer service or sales)
+- Have its own knowledge and training
+- Use different tools (like email or calendar)
+- Remember conversations with users
+
+**Example:** You might have one studio for customer support and another for lead generation.
+
+### Knowledge Base 📚
+
+This is what your AI knows. There are two ways to give your AI knowledge:
+
+1. **Crawl Jobs** 🕷️
+
+   - Point to websites you want the AI to learn from
+   - Upload documents (like PDFs or Word files)
+   - Add text directly
+
+2. **KB Packages** 📦
+   - Pre-made knowledge sets you can subscribe to
+   - Share knowledge between different studios
+   - Knowledge that updates automatically
+
+**Example:** For a tech support AI, you might crawl your help center website and upload your product manuals.
+
+### Tools 🛠️
+
+Tools are what your AI can do besides just chat. For example:
+
+- Send emails
+- Schedule meetings
+- Look up customer information
+- Create tickets
+
+You can turn tools on or off for each studio, like giving different permissions to different employees.
+
+## Quick Start Guide
+
+1. **Set Up Your Workspace**
+
+   - Sign up for Synervus
+   - Create a workspace (like "My Company")
+   - Add team members if needed
+
+2. **Create Your First Studio**
+
+   - Click "New Studio"
+   - Give it a name and purpose
+   - Choose a profile picture and personality
+
+3. **Add Knowledge**
+
+   - Upload your important documents
+   - Add website URLs to crawl
+   - Browse KB packages to subscribe to
+
+4. **Enable Tools**
+
+   - Pick which tools your AI needs
+   - Add necessary connections (like email accounts)
+   - Test each tool works
+
+5. **Launch Your AI**
+   - Test it internally first
+   - Make adjustments as needed
+   - Share it with your team or customers
+
+## Tips for Success
+
+- Start small: Begin with one specific use case
+- Test thoroughly: Chat with your AI to ensure it gives good responses
+- Update regularly: Keep your knowledge base current
+- Monitor usage: Check how your AI is performing
+- Get feedback: Ask users what could be improved
+
+## Need Help?
+
+- [Connect with Meta platforms](help-center/connect-meta)
+- [Set up GitHub Pages](help-center/gh-pages-setup)
+- [Join our community](https://discord.gg/synervus)
+
+```typescript
+// Example workspace structure
+{
+id: string;
+name: string;
+allowCrawlerForMembers: boolean;
+members: User[];
+settings: WorkspaceSettings;
+}
+```
+
+### Studios 🎨
+
+Studios are where you build and configure your AI agents. Each studio represents a unique AI assistant with its own:
+
+- Knowledge base
+- Conversation history
+- Tool configurations
+- Response templates
+
+Think of studios as individual AI agents, each specialized for different tasks or departments.
+
+### Knowledge Base 📚
+
+The knowledge base is your AI's custom training data, which can be created through:
+
+1. **Crawl Jobs** 🕷️
+
+   - Web crawling of specified URLs
+   - File uploads (PDF, DOCX, etc.)
+   - Custom text input
+
+2. **KB Packages** 📦
+   - Pre-built knowledge sets
+   - Shareable between studios
+   - Auto-updating content
+
+Reference from implementation:

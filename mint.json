@@ -1,29 +1,29 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Starter Kit",
+  "name": "Synervus",
   "logo": {
     "dark": "/logo/dark.png",
     "light": "/logo/light.png"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/logo/dark.png",
   "colors": {
-    "primary": "#0D9373",
-    "light": "#07C983",
-    "dark": "#0D9373",
+    "primary": "#28a9ff",
+    "light": "#28a9ff",
+    "dark": "#28a9ff",
     "anchors": {
-      "from": "#0D9373",
-      "to": "#07C983"
+      "from": "#28a9ff",
+      "to": "#28a9ff"
     }
   },
   "topbarLinks": [
     {
       "name": "Support",
-      "url": "mailto:hi@mintlify.com"
+      "url": "mailto:hello@tixaeagents.com"
     }
   ],
   "topbarCtaButton": {
     "name": "Dashboard",
-    "url": "https://dashboard.mintlify.com"
+    "url": "https://synervus.ai/"
   },
   "tabs": [
     {
@@ -46,7 +46,7 @@
   "navigation": [
     {
       "group": "Get Started",
-      "pages": ["introduction"]
+      "pages": ["introduction", "getting-started"]
     },
     {
       "group": "API Documentation",
